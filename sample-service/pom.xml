@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.smava.example</groupId>
+        <artifactId>wssecurity</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>de.smava.example</groupId>
+    <artifactId>sample-service</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <spring.version>3.2.8.RELEASE</spring.version>
+        <eclipse.jetty.version>8.1.14.v20131031</eclipse.jetty.version>
+        <cxf.version>3.0.1</cxf.version>
+        <jaxbVersion>2.1.13</jaxbVersion>
+        <jaxb.basics.version>0.6.5</jaxb.basics.version>
+        <signature.algorithm>SHA1withRSA</signature.algorithm>
+        <key.algorithm>RSA</key.algorithm>
+        <key.size>2048</key.size>
+    </properties>
+
+    <modules>
+        <module>sample-service-web</module>
+        <module>sample-service-entities</module>
+        <module>sample-service-client</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.smava.example</groupId>
+                <artifactId>sample-service-entities</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

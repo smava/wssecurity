@@ -1,0 +1,143 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:schema="http://smava.de/wssecurity/sample"
+                  xmlns:tns="http://ws.example.smava.de/"
+
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+                  xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/ws-securitypolicy.xsd"
+
+                  targetNamespace="http://ws.example.smava.de/">
+
+    <wsp:Policy wsu:Id="SampleServiceBindingPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:AsymmetricBinding>
+                    <wsp:Policy>
+                        <sp:InitiatorToken>
+                            <wsp:Policy>
+                                <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token11 />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:InitiatorToken>
+                        <sp:RecipientToken>
+                            <wsp:Policy>
+                                <sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/Never">
+                                    <wsp:Policy>
+                                        <sp:WssX509V3Token11 />
+                                        <sp:RequireIssuerSerialReference />
+                                    </wsp:Policy>
+                                </sp:X509Token>
+                            </wsp:Policy>
+                        </sp:RecipientToken>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <sp:Strict />
+                            </wsp:Policy>
+                        </sp:Layout>
+                        <sp:IncludeTimestamp />
+                        <sp:OnlySignEntireHeadersAndBody />
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic128 />
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                        <sp:EncryptSignature />
+                    </wsp:Policy>
+                </sp:AsymmetricBinding>
+                <sp:Wss11>
+                    <wsp:Policy>
+                        <sp:MustSupportRefIssuerSerial />
+                    </wsp:Policy>
+                </sp:Wss11>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="SampleServiceInputBindingPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:EncryptedParts>
+                    <sp:Body />
+                </sp:EncryptedParts>
+                <sp:SignedParts>
+                    <sp:Body />
+                    <sp:Header Namespace="http://ws.example.smava.de/"/>
+                </sp:SignedParts>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsp:Policy wsu:Id="SampleServiceOutputBindingPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <sp:EncryptedParts>
+                    <sp:Body />
+                </sp:EncryptedParts>
+                <sp:SignedParts>
+                    <sp:Body />
+                    <sp:Header Namespace="http://ws.example.smava.de/"/>
+                </sp:SignedParts>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+
+    <wsdl:types>
+        <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <xsd:import namespace="http://smava.de/wssecurity/sample"
+            schemaLocation="SampleServiceObjects.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!--request object-->
+    <wsdl:message name="StatusRequest">
+        <wsdl:part element="schema:StatusRequest" name="StatusRequest"/>
+    </wsdl:message>
+
+    <wsdl:message name="StatusResponse">
+        <wsdl:part element="schema:StatusResponse" name="StatusResponse"/>
+    </wsdl:message>
+
+
+
+    <wsdl:portType name="StatusResource">
+        <wsdl:operation name="setStatus">
+            <wsdl:input message="tns:StatusRequest" name="StatusRequest"/>
+            <wsdl:output message="tns:StatusResponse" name="StatusResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="StatusResourceBinding" type="tns:StatusResource">
+        <wsp:PolicyReference URI="#SampleServiceBindingPolicy" />
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="setStatus">
+            <soap:operation soapAction="http://smava.de/wssecurity/setStatus"/>
+
+            <wsdl:input name="StatusRequest">
+                <wsp:PolicyReference URI="#SampleServiceInputBindingPolicy"/>
+                <soap:body use="literal"/>
+            </wsdl:input>
+
+            <wsdl:output name="StatusResponse">
+                <wsp:PolicyReference URI="#SampleServiceOutputBindingPolicy"/>
+                <soap:body use="literal"/>
+            </wsdl:output>
+
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="SampleWebServiceImplService">
+        <wsdl:port binding="tns:StatusResourceBinding" name="SampleWebServiceImplPort">
+            <soap:address location="http://localhost:8181/SampleService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+
+
+
+</wsdl:definitions>

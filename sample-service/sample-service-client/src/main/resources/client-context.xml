@@ -1,0 +1,40 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+    ">
+
+    <jaxws:client id="sampleClient"
+                  serviceClass="de.smava.example.ws.StatusResource"
+                  address="http://localhost:8181/SampleService"
+                  wsdlLocation="wsdl/SampleService.wsdl"
+                  serviceName="s:SampleWebServiceImplService"
+                  endpointName="s:SampleWebServiceImplPort"
+                  xmlns:s="http://ws.example.smava.de/"
+            >
+
+        <jaxws:properties>
+            <entry key="ws-security.callback-handler" value="de.smava.example.client.SampleServiceKeystorePasswordCallback"/>
+            <entry key="ws-security.encryption.properties" value="encryptionKeystore.properties"/>
+            <entry key="ws-security.decryption.properties" value="encryptionKeystore.properties"/>
+            <entry key="ws-security.signature.properties" value="clientKeystore.properties"/>
+            <entry key="ws-security.encryption.username" value="smava_service_alias"/>
+            <entry key="ws-security.sts.token.usecert" value="true"/>
+        </jaxws:properties>
+
+        <jaxws:inInterceptors>
+            <bean class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+        </jaxws:inInterceptors>
+        <jaxws:outInterceptors>
+            <bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+        </jaxws:outInterceptors>
+
+    </jaxws:client>
+
+
+
+</beans>

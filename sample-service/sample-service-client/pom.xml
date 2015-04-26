@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.smava.example</groupId>
+        <artifactId>sample-service</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>de.smava.example</groupId>
+    <artifactId>sample-service-client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <client.module>true</client.module>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.smava.example</groupId>
+            <artifactId>sample-service-entities</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <!-- Apache CXF (for use instead of JAX-WS) -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+            <version>${cxf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+            <version>${cxf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--CXF - God save my soul-->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+            <version>${cxf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-policy</artifactId>
+            <version>${cxf.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>generate_keystore</id>
+            <build>
+                <plugins>
+
+                    <!--generate client keystore-->
+                    <plugin>
+                        <inherited>false</inherited>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>keytool-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>generateKeyPair</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <keystore>${basedir}/src/main/resources/clientKeystore.jks</keystore>
+                            <storepass>storepass</storepass>
+                            <keypass>keypass</keypass>
+                            <alias>sample_client_alias</alias>
+                            <dname>cn=www.sample.de, ou=rnd, L=Berlin, ST=Berlin, o=SampleGmbH, c=DE</dname>
+                            <sigalg>${signature.algorithm}</sigalg>
+                            <validity>100</validity>
+                            <keyalg>${key.algorithm}</keyalg>
+                            <keysize>${key.size}</keysize>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>export_certificate</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>keytool-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>exportCertificate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <alias>sample_client_alias</alias>
+                            <keystore>${basedir}/src/main/resources/clientKeystore.jks</keystore>
+                            <keypass>keypass</keypass>
+                            <storepass>storepass</storepass>
+                            <file>${basedir}/src/main/resources/sample_client_alias.cert</file>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>import_certificate</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>keytool-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>importCertificate</goal>
+                                </goals>
+                                <phase>generate-sources</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <alias>smava_service_alias</alias>
+                            <keystore>${basedir}/src/main/resources/clientKeystore.jks</keystore>
+                            <noprompt>true</noprompt>
+                            <storepass>storepass</storepass>
+                            <file>${basedir}/../sample-service-web/src/main/resources/smava_service_alias.cert</file>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
